@@ -1,0 +1,117 @@
+[
+  {
+    "id": "role",
+    "type": "menu",
+    "text": "Select your role:",
+    "height": 15,
+    "width": 45,
+    "options": [
+      {"tag": "Install", "item": "Sachin Provision new cluster & IMM App" , "next": "values_yaml"},
+      {"tag": "Add Node", "item": "Create a cluster before install", "next": "username"},
+      {"tag": "System Prep", "item": "Install all prerequisites for future install(faster)."},
+      {"tag": "Remove", "item": "Uninstall IMM and cleanup cluster"}
+    ]
+  },
+  {
+  "id": "values_yaml",
+  "type": "form",
+  "text": "Please enter your configuration details:",
+  "height": 15,
+  "width": 60,
+  "next": "",
+  "options": [
+    {
+      "tag": "REQ_HISTORY_THRESHOLD_IN_DAYS:",
+      "variable": "REQ_HISTORY_THRESHOLD_IN_DAYS",
+      "default": "$DEFAULT_REQ_HISTORY_THRESHOLD_IN_DAYS",
+      "type": "input"
+    },
+    {
+      "tag": "REQ_BODY_MAX_SIZE_IN_BYTES:",
+      "variable": "REQ_BODY_MAX_SIZE_IN_BYTES",
+      "default": "$DEFAULT_REQ_BODY_MAX_SIZE_IN_BYTES",
+      "type": "input"
+    },
+    {
+      "tag": "TIMEOUT:",
+      "variable": "TIMEOUT",
+      "default": "$DEFAULT_TIMEOUT",
+      "type": "input"
+    },
+    {
+      "tag": "LOG_HISTORY_THRESHOLD_IN_DAYS:",
+      "variable": "LOG_HISTORY_THRESHOLD_IN_DAYS",
+      "default": "$DEFAULT_LOG_HISTORY_THRESHOLD_IN_DAYS",
+      "type": "input"
+    },
+    {
+      "tag": "WIRE_TIGER_CACHE_GB:",
+      "variable": "WIRE_TIGER_CACHE_GB",
+      "default": "$DEFAULT_WIRE_TIGER_CACHE_GB",
+      "type": "input"
+    },
+    {
+      "tag": "TIMEZONE:",
+      "variable": "TIMEZONE",
+      "default": "$DEFAULT_TIMEZONE",
+      "type": "input"
+    },
+    {
+      "tag": "LOG_LEVEL:",
+      "variable": "LOG_LEVEL",
+      "default": "$DEFAULT_LOG_LEVEL",
+      "type": "input"
+    }
+  ]
+},
+{
+    "id": "ssl",
+    "type": "menu",
+    "text": "Choose the deployment type",
+    "next": "values_yaml",
+    "height": 15,
+    "width": 45,
+    "options": [
+      {"tag": "1", "item": "HTTP (Default)" , "next": "mode"},
+      {"tag": "2", "item": "HTTPS " , "next": "mode"}
+    ]
+  },
+  {
+    "id": "mode",
+    "type": "menu",
+    "text": "Do you want to deploy IMM in a high availability mode?:",
+    "height": 15,
+    "width": 45,
+    "options": [
+      {"tag": "1", "item": "No / Single Instance (Default)" , "next": "survey"},
+      {"tag": "2", "item": "Yes / High Availability" , "next": "survey"}
+    ]
+  },
+  {
+    "id": "mode",
+    "type": "menu",
+    "text": "Do you want to override default values for the IMM instance",
+    "height": 15,
+    "width": 45,
+    "options": [
+      {"tag": "1", "item": "No / Single Instance (Default)" , "next": "survey"},
+      {"tag": "2", "item": "Yes / High Availability" , "next": "survey"}
+    ]
+  },
+  {
+    "id": "username",
+    "type": "inputbox",
+    "text": "Enter your name:",
+    "height": 8,
+    "width": 40,
+    "default": "Sachin"
+  },
+  {
+    "id": "survey",
+    "type": "inputbox",
+    "text": "Do you like this tool?",
+    "ok_label": "Yes",
+    "cancel_label": "No",
+    "extra_label": "Maybe"
+  }
+]
