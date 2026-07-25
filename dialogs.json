@@ -23,43 +23,43 @@
     {
       "tag": "REQ_HISTORY_THRESHOLD_IN_DAYS:",
       "variable": "REQ_HISTORY_THRESHOLD_IN_DAYS",
-      "default": "$DEFAULT_REQ_HISTORY_THRESHOLD_IN_DAYS",
+      "default": "555555",
       "type": "input"
     },
     {
       "tag": "REQ_BODY_MAX_SIZE_IN_BYTES:",
       "variable": "REQ_BODY_MAX_SIZE_IN_BYTES",
-      "default": "$DEFAULT_REQ_BODY_MAX_SIZE_IN_BYTES",
+      "default": "5",
       "type": "input"
     },
     {
       "tag": "TIMEOUT:",
       "variable": "TIMEOUT",
-      "default": "$DEFAULT_TIMEOUT",
+      "default": "5",
       "type": "input"
     },
     {
       "tag": "LOG_HISTORY_THRESHOLD_IN_DAYS:",
       "variable": "LOG_HISTORY_THRESHOLD_IN_DAYS",
-      "default": "$DEFAULT_LOG_HISTORY_THRESHOLD_IN_DAYS",
+      "default": "5",
       "type": "input"
     },
     {
       "tag": "WIRE_TIGER_CACHE_GB:",
       "variable": "WIRE_TIGER_CACHE_GB",
-      "default": "$DEFAULT_WIRE_TIGER_CACHE_GB",
+      "default": "$5",
       "type": "input"
     },
     {
       "tag": "TIMEZONE:",
       "variable": "TIMEZONE",
-      "default": "$DEFAULT_TIMEZONE",
+      "default": "5",
       "type": "input"
     },
     {
       "tag": "LOG_LEVEL:",
       "variable": "LOG_LEVEL",
-      "default": "$DEFAULT_LOG_LEVEL",
+      "default": "5",
       "type": "input"
     }
   ]
