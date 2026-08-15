@@ -39,13 +39,13 @@ brew install dialog jq
 Run the default project wizard showcasing all supported dialog types:
 
 ```bash
-./run.sh
+./saywhat
 ```
 
 To run a custom schema starting at a specific node:
 
 ```bash
-./run.sh path/to/your_schema.json initial_node_id
+./saywhat path/to/your_schema.json initial_node_id
 ```
 
 ---
