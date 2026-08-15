@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SayWhat JSON Flow Builder</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --panel-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --border-color: #334155;
+      --input-bg: #0f172a;
+      --radius: 8px;
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1080px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1080px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .flow-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--input-bg);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      cursor: default;
+    }
+
+    /* Dragging TUI styling classes */
+    .flow-row.dragging {
+      opacity: 0.4;
+      background: #1e293b;
+      border-style: dashed;
+    }
+
+    .flow-row.drag-over {
+      border: 2px solid var(--accent);
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-weight: bold;
+      user-select: none;
+      padding: 0 8px;
+      font-size: 16px;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    input, select, textarea {
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    .input-id {
+      width: 150px;
+    }
+
+    .select-type {
+      width: 130px;
+    }
+
+    .input-text-preview {
+      flex-grow: 1;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    /* Transition display area */
+    .transition-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 300px;
+      min-width: 150px;
+    }
+
+    .transition-badge {
+      background: #334155;
+      color: #93c5fd;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #475569;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .transition-badge.badge-broken {
+      background: #451a03;
+      color: #fdba74;
+      border-color: #78350f;
+      text-decoration: line-through;
+    }
+
+    .transition-badge.badge-end {
+      background: #14532d;
+      color: #86efac;
+      border-color: #166534;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      padding: 8px 12px;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    .btn-zoom {
+      background: #334155;
+      color: var(--text-main);
+      padding: 8px 12px;
+    }
+
+    .btn-zoom:hover {
+      background: #475569;
+    }
+
+    .actions-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+
+    /* Modal styling */
+    dialog {
+      background: var(--panel-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 550px;
+      width: 90%;
+      margin: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-header {
+      margin-bottom: 20px;
+    }
+
+    .dialog-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .dialog-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .dynamic-field-section {
+      border-top: 1px dashed var(--border-color);
+      padding-top: 16px;
+      margin-top: 8px;
+    }
+
+    .sub-option-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .sub-option-row input {
+      flex: 1;
+      min-width: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic datalist container that updates to autocomplete node IDs -->
+  <datalist id="nodes-datalist"></datalist>
+
+  <header>
+    <div>
+      <h1>SayWhat TUI Wizard Builder</h1>
+      <div class="subtitle">Design interactive flow schemas and export json configuration files</div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="btn-secondary" onclick="importJson()">Import JSON</button>
+      <button class="btn-primary" onclick="exportJson()">Export JSON</button>
+    </div>
+  </header>
+
+  <main>
+    <button id="btn-toggle-labels" class="btn-secondary" style="position: absolute; top: 12px; right: 12px; padding: 6px 10px; font-size: 12px;" onclick="toggleButtonLabels()" title="Toggle button labels visibility">👁</button>
+    <div id="rows-container" class="rows-container" style="margin-top: 15px;">
+      <!-- Rows will be injected here dynamically -->
+    </div>
+    <div class="actions-footer">
+      <button class="btn-secondary" onclick="addFlowRow()">+ Add Dialog Node</button>
+    </div>
+  </main>
+
+  <!-- Zoom Dialog / Modal Editor -->
+  <dialog id="detail-modal">
+    <div class="dialog-header">
+      <h3 id="modal-title">Configure Dialog</h3>
+    </div>
+    <div class="dialog-form">
+      <div class="form-group">
+        <label for="modal-text">Prompt / Display Text</label>
+        <textarea id="modal-text" rows="3" placeholder="Question text to show user..."></textarea>
+      </div>
+
+      <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between;">
+        <label for="modal-back">Show Back Button</label>
+        <input type="checkbox" id="modal-back" style="width: 20px; height: 20px;">
+      </div>
+
+      <div class="form-group">
+        <label for="modal-next">Next Step Default ID</label>
+        <input type="text" id="modal-next" list="nodes-datalist" placeholder="Default ID for next dialog screen...">
+      </div>
+
+      <div class="form-group">
+        <label for="modal-val-hook">Validation Hook (Command / Script)</label>
+        <input type="text" id="modal-val-hook" placeholder="./validate_step.sh">
+      </div>
+
+      <!-- Specific Type Config Sections -->
+      <div id="modal-options-section" class="dynamic-field-section" style="display: none;">
+        <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 10px;">Options / Choices</label>
+        <div id="options-rows-container"></div>
+        <button class="btn-secondary" style="padding: 4px 8px; font-size: 12px; margin-top: 8px;" onclick="addOptionRow()">+ Add Option</button>
+      </div>
+
+      <div id="modal-inputbox-section" class="dynamic-field-section" style="display: none;">
+        <div class="form-group">
+          <label for="modal-default-val">Default Input Value</label>
+          <input type="text" id="modal-default-val" placeholder="Value to show by default...">
+        </div>
+      </div>
+
+      <div id="modal-textbox-section" class="dynamic-field-section" style="display: none;">
+        <div class="form-group">
+          <label for="modal-file-path">File Path to Display</label>
+          <input type="text" id="modal-file-path" placeholder="./LICENSE">
+        </div>
+      </div>
+    </div>
+    <div class="dialog-buttons">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveModalDetails()">Save Changes</button>
+    </div>
+  </dialog>
+
+  <script>
+    // In-memory array storing configuration data
+    let flowData = [
+      {
+        id: "welcome",
+        type: "msgbox",
+        text: "Welcome to the custom installer setup wizard!",
+        next: "project_type"
+      }
+    ];
+
+    let currentEditingIndex = null;
+    let draggedIndex = null;
+    let showLabels = true;
+
+    function toggleButtonLabels() {
+      showLabels = !showLabels;
+      const toggleBtn = document.getElementById('btn-toggle-labels');
+      toggleBtn.innerText = showLabels ? '👁' : '👁‍🗨';
+      renderRows();
+    }
+
+    // Refresh autocomplete list with current node IDs
+    function updateDatalist() {
+      const dl = document.getElementById('nodes-datalist');
+      dl.innerHTML = '';
+      flowData.forEach(node => {
+        if (node.id) {
+          const opt = document.createElement('option');
+          opt.value = node.id;
+          dl.appendChild(opt);
+        }
+      });
+    }
+
+    // Helper to check if a node ID exists in our flow list
+    function idExists(id) {
+      if (!id || id === "null") return false;
+      return flowData.some(n => n.id === id);
+    }
+
+    // Render visual badges representing transitions for a node
+    function getTransitionBadges(node) {
+      let badges = '';
+      
+      const makeBadge = (targetId, prefix = '') => {
+        if (!targetId || targetId === "null") {
+          return `<span class="transition-badge badge-end">${prefix}⏹ End</span>`;
+        }
+        if (idExists(targetId)) {
+          return `<span class="transition-badge">${prefix}→ ${targetId}</span>`;
+        }
+        return `<span class="transition-badge badge-broken">${prefix}⚠ Broken: ${targetId}</span>`;
+      };
+
+      if (['menu'].includes(node.type) && node.options && node.options.length > 0) {
+        node.options.forEach(opt => {
+          if (opt.tag) {
+            badges += makeBadge(opt.next, `[${opt.tag}] `);
+          }
+        });
+      } else {
+        badges += makeBadge(node.next);
+      }
+      return badges;
+    }
+
+    // Drag and Drop Handlers
+    function handleDragStart(e, index) {
+      draggedIndex = index;
+      e.currentTarget.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      const rows = document.querySelectorAll('.flow-row');
+      rows.forEach(r => r.classList.remove('drag-over'));
+      draggedIndex = null;
+    }
+
+    function handleDragOver(e, index) {
+      e.preventDefault();
+      if (draggedIndex === null || draggedIndex === index) return;
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e, index) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (draggedIndex === null || draggedIndex === index) return;
+      
+      // Rearrange array index positions
+      const draggedNode = flowData[draggedIndex];
+      flowData.splice(draggedIndex, 1);
+      flowData.splice(index, 0, draggedNode);
+      renderRows();
+    }
+
+    // Duplicate Node Flow helper
+    function duplicateRow(index) {
+      const source = flowData[index];
+      // Deep clone the object
+      const cloned = JSON.parse(JSON.stringify(source));
+      cloned.id = cloned.id + "_copy";
+      
+      // Insert duplicate directly below source row
+      flowData.splice(index + 1, 0, cloned);
+      renderRows();
+    }
+
+    // Render list rows
+    function renderRows() {
+      updateDatalist();
+      const container = document.getElementById('rows-container');
+      container.innerHTML = '';
+      
+      flowData.forEach((node, index) => {
+        const row = document.createElement('div');
+        row.className = 'flow-row';
+        row.draggable = true;
+        
+        // Bind Drag and Drop listeners
+        row.addEventListener('dragstart', (e) => handleDragStart(e, index));
+        row.addEventListener('dragend', handleDragEnd);
+        row.addEventListener('dragover', (e) => handleDragOver(e, index));
+        row.addEventListener('dragleave', handleDragLeave);
+        row.addEventListener('drop', (e) => handleDrop(e, index));
+
+        row.innerHTML = `
+          <div class="drag-handle">⋮⋮</div>
+          <input type="text" class="input-id" value="${node.id}" placeholder="ID" onchange="updateId(${index}, this.value)">
+          <select class="select-type" onchange="updateType(${index}, this.value)">
+            <option value="msgbox" ${node.type === 'msgbox' ? 'selected' : ''}>msgbox</option>
+            <option value="yesno" ${node.type === 'yesno' ? 'selected' : ''}>yesno</option>
+            <option value="menu" ${node.type === 'menu' ? 'selected' : ''}>menu</option>
+            <option value="form" ${node.type === 'form' ? 'selected' : ''}>form</option>
+            <option value="inputbox" ${node.type === 'inputbox' ? 'selected' : ''}>inputbox</option>
+            <option value="passwordbox" ${node.type === 'passwordbox' ? 'selected' : ''}>passwordbox</option>
+            <option value="checklist" ${node.type === 'checklist' ? 'selected' : ''}>checklist</option>
+            <option value="radiolist" ${node.type === 'radiolist' ? 'selected' : ''}>radiolist</option>
+            <option value="textbox" ${node.type === 'textbox' ? 'selected' : ''}>textbox</option>
+          </select>
+          <span class="input-text-preview" title="${node.text || ''}">${node.text || '(empty prompt text)'}</span>
+          <span style="font-size: 16px; margin: 0 4px;" title="${node.validation_hook ? 'Validation script: ' + node.validation_hook : ''}">${node.validation_hook ? '⚡' : ''}</span>
+          <div class="transition-preview">
+            ${getTransitionBadges(node)}
+          </div>
+          <button class="btn-zoom" onclick="duplicateRow(${index})" title="Clone Node">${showLabels ? 'Clone 📋' : '📋'}</button>
+          <button class="btn-zoom" onclick="openModal(${index})" title="Configure Details">${showLabels ? 'Configure ⚙️' : '⚙️'}</button>
+          <button class="btn-danger" onclick="deleteRow(${index})" title="Delete Node">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addFlowRow() {
+      flowData.push({
+        id: "step_" + (flowData.length + 1),
+        type: "menu",
+        text: "",
+        next: ""
+      });
+      renderRows();
+    }
+
+    function deleteRow(index) {
+      flowData.splice(index, 1);
+      renderRows();
+    }
+
+    function updateId(index, value) {
+      flowData[index].id = value;
+      renderRows(); // Refresh to update targets and autocompletion datalists
+    }
+
+    function updateType(index, value) {
+      flowData[index].type = value;
+      // Clean up irrelevant variables if type is switched
+      if (['menu', 'form', 'checklist', 'radiolist'].includes(value)) {
+        if (!flowData[index].options) flowData[index].options = [];
+      } else {
+        delete flowData[index].options;
+      }
+      renderRows();
+    }
+
+    // Modal Operations
+    function openModal(index) {
+      currentEditingIndex = index;
+      const node = flowData[index];
+      const modal = document.getElementById('detail-modal');
+
+      document.getElementById('modal-title').innerText = `Configure node: "${node.id}" (${node.type})`;
+      document.getElementById('modal-text').value = node.text || '';
+      document.getElementById('modal-back').checked = !!node.back_button;
+      document.getElementById('modal-next').value = node.next || '';
+      document.getElementById('modal-val-hook').value = node.validation_hook || '';
+
+      // Hide all specific sections first
+      document.getElementById('modal-options-section').style.display = 'none';
+      document.getElementById('modal-inputbox-section').style.display = 'none';
+      document.getElementById('modal-textbox-section').style.display = 'none';
+
+      // Setup dynamic panels
+      if (['menu', 'form', 'checklist', 'radiolist'].includes(node.type)) {
+        document.getElementById('modal-options-section').style.display = 'block';
+        renderOptionsList(node);
+      } else if (['inputbox', 'passwordbox'].includes(node.type)) {
+        document.getElementById('modal-inputbox-section').style.display = 'block';
+        document.getElementById('modal-default-val').value = node.default || '';
+      } else if (node.type === 'textbox') {
+        document.getElementById('modal-textbox-section').style.display = 'block';
+        document.getElementById('modal-file-path').value = node.file || '';
+      }
+
+      modal.showModal();
+    }
+
+    function closeModal() {
+      document.getElementById('detail-modal').close();
+    }
+
+    function renderOptionsList(node) {
+      const container = document.getElementById('options-rows-container');
+      container.innerHTML = '';
+      
+      const options = node.options || [];
+      options.forEach((opt, idx) => {
+        const div = document.createElement('div');
+        div.className = 'sub-option-row';
+        if (['menu'].includes(node.type)) {
+          div.innerHTML = `
+            <input type="text" placeholder="Tag (e.g. yes)" value="${opt.tag || ''}" onchange="updateSubOpt(${idx}, 'tag', this.value)">
+            <input type="text" placeholder="Menu description" value="${opt.item || ''}" onchange="updateSubOpt(${idx}, 'item', this.value)">
+            <input type="text" placeholder="Next ID" list="nodes-datalist" value="${opt.next || ''}" onchange="updateSubOpt(${idx}, 'next', this.value)">
+            <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteSubOpt(${idx})">✕</button>
+          `;
+        } else if (['checklist', 'radiolist'].includes(node.type)) {
+          div.innerHTML = `
+            <input type="text" placeholder="Tag (e.g. feature)" value="${opt.tag || ''}" onchange="updateSubOpt(${idx}, 'tag', this.value)">
+            <input type="text" placeholder="Display description" value="${opt.item || ''}" onchange="updateSubOpt(${idx}, 'item', this.value)">
+            <input type="text" placeholder="Status (on/off)" value="${opt.status || 'off'}" onchange="updateSubOpt(${idx}, 'status', this.value)">
+            <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteSubOpt(${idx})">✕</button>
+          `;
+        } else if (node.type === 'form') {
+          div.innerHTML = `
+            <input type="text" placeholder="Field Label (e.g. Username:)" value="${opt.tag || ''}" onchange="updateSubOpt(${idx}, 'tag', this.value)">
+            <input type="text" placeholder="Variable Name" value="${opt.variable || ''}" onchange="updateSubOpt(${idx}, 'variable', this.value)">
+            <input type="text" placeholder="Default value" value="${opt.default || ''}" onchange="updateSubOpt(${idx}, 'default', this.value)">
+            <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteSubOpt(${idx})">✕</button>
+          `;
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function addOptionRow() {
+      const node = flowData[currentEditingIndex];
+      if (!node.options) node.options = [];
+      
+      const newOpt = {};
+      if (['menu'].includes(node.type)) {
+        newOpt.tag = ''; newOpt.item = ''; newOpt.next = '';
+      } else if (['checklist', 'radiolist'].includes(node.type)) {
+        newOpt.tag = ''; newOpt.item = ''; newOpt.status = 'off';
+      } else if (node.type === 'form') {
+        newOpt.tag = ''; newOpt.variable = ''; newOpt.default = '';
+      }
+      
+      node.options.push(newOpt);
+      renderOptionsList(node);
+    }
+
+    function deleteSubOpt(idx) {
+      const node = flowData[currentEditingIndex];
+      node.options.splice(idx, 1);
+      renderOptionsList(node);
+    }
+
+    function updateSubOpt(idx, key, value) {
+      const node = flowData[currentEditingIndex];
+      node.options[idx][key] = value;
+    }
+
+    function saveModalDetails() {
+      const node = flowData[currentEditingIndex];
+      node.text = document.getElementById('modal-text').value;
+      
+      const backVal = document.getElementById('modal-back').checked;
+      if (backVal) {
+        node.back_button = true;
+      } else {
+        delete node.back_button;
+      }
+
+      node.next = document.getElementById('modal-next').value;
+
+      const hookVal = document.getElementById('modal-val-hook').value;
+      if (hookVal) {
+        node.validation_hook = hookVal;
+      } else {
+        delete node.validation_hook;
+      }
+
+      if (['inputbox', 'passwordbox'].includes(node.type)) {
+        node.default = document.getElementById('modal-default-val').value;
+      } else if (node.type === 'textbox') {
+        node.file = document.getElementById('modal-file-path').value;
+      }
+
+      closeModal();
+      renderRows();
+    }
+
+    // Export output
+    function exportJson() {
+      const dataStr = JSON.stringify(flowData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'dialogs.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+
+    // Import configurations
+    function importJson() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.readAsText(file,'UTF-8');
+        reader.onload = readerEvent => {
+          try {
+            const parsed = JSON.parse(readerEvent.target.result);
+            if (Array.isArray(parsed)) {
+              flowData = parsed;
+              renderRows();
+            } else {
+              alert("Error: Imported JSON must be an array of dialog nodes.");
+            }
+          } catch(err) {
+            alert("Error parsing JSON: " + err.message);
+          }
+        }
+      }
+      input.click();
+    }
+
+    // Initial render
+    renderRows();
+  </script>
+</body>
+</html>

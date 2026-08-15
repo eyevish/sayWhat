@@ -1,0 +1,114 @@
+[
+  {
+    "id": "welcome",
+    "type": "msgbox",
+    "text": "Welcome to the agbuild TUI Demonstration!\n\nThis workflow showcases all supported dialog types. Press Enter to start.",
+    "next": "ask_agree"
+  },
+  {
+    "id": "ask_agree",
+    "type": "yesno",
+    "back_button": true,
+    "text": "Do you agree to proceed with the demo setup?",
+    "next": "view_license"
+  },
+  {
+    "id": "view_license",
+    "type": "textbox",
+    "back_button": true,
+    "file": "./LICENSE",
+    "next": "project_type"
+  },
+  {
+    "id": "project_type",
+    "type": "menu",
+    "back_button": true,
+    "text": "Select project template to build:",
+    "options": [
+      {"tag": "web", "item": "Web Application (Node.js/Vite)", "next": "web_config"},
+      {"tag": "python", "item": "Python CLI tool / Service", "next": "py_config"},
+      {"tag": "quit", "item": "Exit wizard", "next": ""}
+    ]
+  },
+  {
+    "id": "web_config",
+    "type": "form",
+    "back_button": true,
+    "text": "Web Application Properties:",
+    "options": [
+      {
+        "tag": "Project Name:",
+        "variable": "name",
+        "default": "my-web-app"
+      },
+      {
+        "tag": "Port Number:",
+        "variable": "port",
+        "default": "3000"
+      }
+    ],
+    "validation_hook": "./hookScripts/validate_project_name.sh",
+    "next": "web_addons"
+  },
+  {
+    "id": "web_addons",
+    "type": "checklist",
+    "back_button": true,
+    "text": "Select additions/addons to install:",
+    "options": [
+      {"tag": "tailwind", "item": "TailwindCSS Styling", "status": "on"},
+      {"tag": "typescript", "item": "TypeScript Configuration", "status": "on"},
+      {"tag": "router", "item": "React / Vue Router setup", "status": "off"}
+    ],
+    "next": "db_setup"
+  },
+  {
+    "id": "db_setup",
+    "type": "radiolist",
+    "back_button": true,
+    "text": "Select target Database engine:",
+    "options": [
+      {"tag": "sqlite", "item": "SQLite (Local File)", "status": "on"},
+      {"tag": "postgres", "item": "PostgreSQL (Production)", "status": "off"},
+      {"tag": "mysql", "item": "MySQL / MariaDB", "status": "off"}
+    ],
+    "next": "admin_creds"
+  },
+  {
+    "id": "admin_creds",
+    "type": "passwordbox",
+    "back_button": true,
+    "text": "Enter secure Admin password:",
+    "default": "",
+    "next": "confirm"
+  },
+  {
+    "id": "py_config",
+    "type": "form",
+    "back_button": true,
+    "text": "Python Application Properties:",
+    "options": [
+      {
+        "tag": "Project Name:",
+        "variable": "name",
+        "default": "my-python-app"
+      },
+      {
+        "tag": "Python Version:",
+        "variable": "py_version",
+        "default": "3.11"
+      }
+    ],
+    "next": "confirm"
+  },
+  {
+    "id": "confirm",
+    "type": "menu",
+    "back_button": true,
+    "text": "Confirm project configuration for project '${web_config_name}${py_config_name}'?",
+    "options": [
+      {"tag": "yes", "item": "Generate project structure", "next": ""},
+      {"tag": "no", "item": "Discard settings and exit", "next": ""}
+    ]
+  }
+]
